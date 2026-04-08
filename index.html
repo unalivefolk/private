@@ -3,43 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Log - Secure Access</title>
+    <title>Private Log - Dark & Light Mode</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Gunakan Tailwind configuration untuk memastikan dark mode bekerja dengan class
+        tailwind.config = {
+            darkMode: 'class'
+        }
+
+        // Inisialisasi tema sebelum konten dimuat
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        initTheme();
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
         .timeline-item::before {
             content: ''; position: absolute; left: -9px; top: 24px; width: 16px; height: 16px;
-            border-radius: 50%; background: #0f172a; border: 3px solid #fff; z-index: 10;
+            border-radius: 50%; z-index: 10;
+            @apply bg-slate-900 border-white dark:bg-slate-100 dark:border-slate-800 border-2;
         }
-        .timeline-line { position: absolute; left: -2px; top: 40px; bottom: 0; width: 2px; background: #e2e8f0; }
+        
+        .timeline-line { 
+            position: absolute; left: -2px; top: 40px; bottom: 0; width: 2px; 
+            @apply bg-slate-200 dark:bg-slate-700;
+        }
+        
         .loading-spinner {
-            border: 2px solid #f3f3f3; border-top: 2px solid #0f172a;
+            border: 2px solid transparent;
+            @apply border-t-slate-900 dark:border-t-white;
             border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite;
         }
+        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
 
-    <!-- Auth Page -->
+    <!-- Theme Toggle Button -->
+    <div class="fixed top-6 right-6 z-50">
+        <button id="themeToggleBtn" class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700 hover:scale-110 transition-all active:scale-95">
+            <!-- Sun Icon (Tampil di Mode Gelap) -->
+            <svg id="sunIcon" class="w-5 h-5 text-yellow-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+            </svg>
+            <!-- Moon Icon (Tampil di Mode Terang) -->
+            <svg id="moonIcon" class="w-5 h-5 text-slate-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Halaman Login -->
     <div id="authPage" class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
+        <div class="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl shadow-xl p-8 border border-slate-100 dark:border-slate-800">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold tracking-tighter text-slate-900">Private Log</h1>
-                <p class="text-slate-400 text-sm mt-2 font-light">Masuk untuk mengakses brankas pribadi</p>
+                <h1 class="text-3xl font-bold tracking-tighter text-slate-900 dark:text-white">Private Log</h1>
+                <p class="text-slate-400 dark:text-slate-500 text-sm mt-2 font-light">Masuk untuk mengakses brankas pribadi</p>
             </div>
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Email</label>
-                    <input type="email" id="email" required class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-slate-200 transition-all">
+                    <input type="email" id="email" required class="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 text-slate-900 dark:text-white transition-all">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Password</label>
-                    <input type="password" id="password" required class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-slate-200 transition-all">
+                    <input type="password" id="password" required class="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 text-slate-900 dark:text-white transition-all">
                 </div>
-                <button type="submit" id="loginBtn" class="w-full bg-slate-900 text-white font-semibold py-4 rounded-2xl hover:bg-black transition-all shadow-lg shadow-slate-200 active:scale-[0.98]">
+                <button type="submit" id="loginBtn" class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-semibold py-4 rounded-2xl hover:bg-black dark:hover:bg-slate-200 transition-all shadow-lg shadow-slate-200 dark:shadow-none active:scale-[0.98]">
                     Buka Brankas
                 </button>
             </form>
@@ -47,13 +90,13 @@
         </div>
     </div>
 
-    <!-- Main App Page -->
+    <!-- Halaman Utama -->
     <div id="appPage" class="hidden p-4 md:p-8">
         <div class="max-w-2xl mx-auto">
             <header class="mb-10 flex flex-col items-center">
-                <h1 class="text-3xl font-bold tracking-tighter text-slate-900">Private Log</h1>
+                <h1 class="text-3xl font-bold tracking-tighter text-slate-900 dark:text-white">Private Log</h1>
                 <div class="flex items-center gap-4 mt-3">
-                    <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                    <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
                         <span>Sesi Aman Aktif</span>
                     </div>
@@ -61,32 +104,35 @@
                 </div>
             </header>
 
-            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 mb-10">
-                <textarea id="noteInput" rows="4" class="w-full p-2 text-slate-700 bg-transparent outline-none transition-all resize-none text-lg font-light" placeholder="Tuliskan isi pikiranmu..."></textarea>
-                <div class="flex flex-col sm:flex-row gap-3 mt-6 border-t border-slate-50 pt-5">
-                    <button id="saveBtn" onclick="addNote()" class="flex-[2] bg-slate-900 hover:bg-black text-white font-medium py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+            <!-- Kotak Input -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-6 mb-10 transition-all">
+                <textarea id="noteInput" rows="4" class="w-full p-2 text-slate-700 dark:text-slate-200 bg-transparent outline-none transition-all resize-none text-lg font-light" placeholder="Tuliskan isi pikiranmu..."></textarea>
+                <div class="flex flex-col sm:flex-row gap-3 mt-6 border-t border-slate-50 dark:border-slate-800 pt-5">
+                    <button id="saveBtn" onclick="addNote()" class="flex-[2] bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
                         Simpan ke Cloud
                     </button>
-                    <button onclick="exportToTxt()" class="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-medium py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2">
+                    <button onclick="exportToTxt()" class="flex-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700">
                         Ekspor .txt
                     </button>
                 </div>
             </div>
 
+            <!-- Timeline -->
             <div id="timelineContainer" class="relative ml-4 pl-10 pb-20 hidden">
                 <div class="timeline-line"></div>
                 <div id="notesList" class="space-y-8"></div>
             </div>
 
-            <div id="stateArea" class="text-center py-20 bg-white/50 rounded-3xl border border-dashed border-slate-200">
+            <!-- Status Kosong -->
+            <div id="stateArea" class="text-center py-20 bg-white/50 dark:bg-slate-900/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
                 <div id="loadingIcon" class="flex justify-center mb-4"><div class="loading-spinner"></div></div>
-                <p id="stateMessage" class="text-slate-400 text-sm font-light">Memuat catatan...</p>
+                <p id="stateMessage" class="text-slate-400 dark:text-slate-600 text-sm font-light">Memuat catatan...</p>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="notification" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 text-sm font-semibold z-50"></div>
+    <!-- Notifikasi Toast -->
+    <div id="notification" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 text-sm font-semibold z-50"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -111,7 +157,31 @@
         let notes = [];
         let currentUserId = null;
 
-        // Login Handler
+        // Logika Toggle Tema yang diperbaiki
+        const updateThemeUI = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('sunIcon').classList.toggle('hidden', !isDark);
+            document.getElementById('moonIcon').classList.toggle('hidden', isDark);
+        };
+
+        const toggleTheme = () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+            updateThemeUI();
+        };
+
+        // Pasang event listener saat DOM siap
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+            updateThemeUI();
+        });
+
+        // Handler Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -133,12 +203,10 @@
             }
         });
 
-        // Logout Handler
         window.logout = () => {
             if(confirm("Keluar dari brankas?")) signOut(auth);
         };
 
-        // Auth State Listener
         onAuthStateChanged(auth, (user) => {
             const authPage = document.getElementById('authPage');
             const appPage = document.getElementById('appPage');
@@ -158,7 +226,6 @@
 
         function startListening() {
             if (!currentUserId) return;
-            // Path menggunakan UID User untuk keamanan maksimal
             const logsRef = ref(db, `private-live/users/${currentUserId}/logs`);
             
             onValue(logsRef, (snapshot) => {
@@ -168,7 +235,7 @@
                 render();
                 toggleStates();
             }, (error) => {
-                showNotif("Gagal sinkronisasi: Cek Rules Database");
+                showNotif("Gagal sinkronisasi.");
             });
         }
 
@@ -208,14 +275,14 @@
         function render() {
             const list = document.getElementById('notesList');
             list.innerHTML = notes.map(n => `
-                <div class="timeline-item relative bg-white p-6 rounded-2xl shadow-sm border border-slate-50">
+                <div class="timeline-item relative bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-800">
                     <div class="flex justify-between items-start mb-4">
-                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">${n.timeLabel}</span>
-                        <button onclick="deleteNote('${n.id}')" class="text-slate-200 hover:text-red-400 transition-colors p-1">
+                        <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest">${n.timeLabel}</span>
+                        <button onclick="deleteNote('${n.id}')" class="text-slate-200 dark:text-slate-700 hover:text-red-400 transition-colors p-1">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </button>
                     </div>
-                    <p class="text-slate-700 whitespace-pre-wrap leading-relaxed font-light text-[16px]">${n.content}</p>
+                    <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-light text-[16px]">${n.content}</p>
                 </div>
             `).join('');
         }
