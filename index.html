@@ -1,16 +1,18 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Log - My Personal Cloud</title>
+    <title>Private Log - Realtime Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
-            background: #f1f5f9;
+            background: #f8fafc;
+            color: #1e293b;
         }
 
         .timeline-item::before {
@@ -21,8 +23,9 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #1e293b;
+            background: #0f172a;
             border: 3px solid #fff;
+            z-index: 10;
         }
 
         .timeline-line {
@@ -31,91 +34,85 @@
             top: 40px;
             bottom: 0;
             width: 2px;
-            background: #cbd5e1;
+            background: #e2e8f0;
         }
 
         .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #1e293b;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0f172a;
             border-radius: 50%;
             width: 20px;
             height: 20px;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
 
     <div class="max-w-2xl mx-auto">
-        <!-- Header -->
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Private Log</h1>
-            <div id="connectionStatus" class="flex items-center justify-center gap-2 mt-2 text-xs text-slate-500">
-                <span id="statusDot" class="w-2 h-2 rounded-full bg-orange-400"></span>
-                <span id="statusText">Sinkronisasi Cloud...</span>
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl font-bold tracking-tighter text-slate-900">Private Log</h1>
+            <div id="connectionStatus" class="flex items-center justify-center gap-2 mt-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                <span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
+                <span id="statusText">Menghubungkan...</span>
             </div>
         </header>
 
-        <!-- Input Area -->
-        <div class="bg-white rounded-2xl shadow-md border border-slate-100 p-6 mb-8">
+        <!-- Input Section -->
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 mb-10 transition-all focus-within:ring-2 focus-within:ring-slate-200">
             <textarea 
                 id="noteInput" 
                 rows="4" 
-                class="w-full p-4 text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-transparent outline-none transition-all resize-none"
-                placeholder="Tuliskan isi pikiranmu di sini..."></textarea>
+                class="w-full p-2 text-slate-700 bg-transparent outline-none transition-all resize-none text-lg font-light"
+                placeholder="Tuliskan isi pikiranmu..."></textarea>
             
-            <div class="flex flex-col sm:flex-row gap-3 mt-4">
+            <div class="flex flex-col sm:flex-row gap-3 mt-6 border-t border-slate-50 pt-5">
                 <button 
                     id="saveBtn"
                     onclick="addNote()" 
                     disabled
-                    class="flex-1 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2">
-                    <span id="btnText">Simpan ke Cloud</span>
+                    class="flex-[2] bg-slate-900 hover:bg-black disabled:bg-slate-200 text-white font-medium py-3 px-6 rounded-2xl transition-all flex items-center justify-center gap-2">
+                    Simpan ke Cloud
                 </button>
                 <button 
                     onclick="exportToTxt()" 
-                    class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-semibold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2">
-                    Ekspor (.txt)
+                    class="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-medium py-3 px-6 rounded-2xl transition-all flex items-center justify-center gap-2">
+                    Ekspor .txt
                 </button>
             </div>
         </div>
 
         <!-- Timeline Section -->
-        <div id="timelineContainer" class="relative ml-4 pl-8 pb-12 hidden">
+        <div id="timelineContainer" class="relative ml-4 pl-10 pb-20 hidden">
             <div class="timeline-line"></div>
-            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em] mb-6 -ml-8">Cloud History</h2>
-            <div id="notesList" class="space-y-6"></div>
+            <div id="notesList" class="space-y-8"></div>
         </div>
 
-        <!-- Empty / Loading States -->
-        <div id="stateArea" class="text-center py-12">
+        <!-- States -->
+        <div id="stateArea" class="text-center py-20 bg-white/50 rounded-3xl border border-dashed border-slate-200">
             <div id="loadingIcon" class="flex justify-center mb-4">
                 <div class="loading-spinner"></div>
             </div>
-            <p id="stateMessage" class="text-slate-500">Membuka brankas data...</p>
+            <p id="stateMessage" class="text-slate-400 text-sm font-light">Sinkronisasi Realtime...</p>
         </div>
     </div>
 
-    <!-- Notif -->
-    <div id="notification" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 text-sm font-medium">
-        Tersimpan!
+    <!-- Notification -->
+    <div id="notification" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white border border-slate-100 px-8 py-4 rounded-2xl shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 text-sm font-semibold">
+        Berhasil.
     </div>
 
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // Konfigurasi Anda
         const firebaseConfig = {
             apiKey: "AIzaSyC22KkotjDzRHxhaBPvBfQGmh28uRQKspI",
             authDomain: "private-live.firebaseapp.com",
+            databaseURL: "https://private-live-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "private-live",
             storageBucket: "private-live.firebasestorage.app",
             messagingSenderId: "187097743795",
@@ -125,81 +122,83 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
         
         let notes = [];
-        // Personal ID: Karena ini hanya untuk Anda, kita gunakan ID tetap
-        // Agar data tersimpan di folder yang sama di semua device Anda
         const MY_LOG_ID = "my-exclusive-log";
 
-        async function init() {
+        async function start() {
             try {
                 await signInAnonymously(auth);
             } catch (err) {
-                console.error(err);
-                document.getElementById('statusText').innerText = "Gagal Sinkronisasi";
+                document.getElementById('statusText').innerText = "Gagal Login";
             }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('statusDot').classList.replace('bg-orange-400', 'bg-green-500');
-                document.getElementById('statusText').innerText = "Personal Cloud Active";
+                document.getElementById('statusDot').classList.replace('bg-slate-300', 'bg-blue-500');
+                document.getElementById('statusText').innerText = "Realtime Cloud Active";
                 document.getElementById('saveBtn').disabled = false;
-                startListening();
+                loadData();
             }
         });
 
-        function startListening() {
-            // Path: /artifacts/private-live/users/my-exclusive-log/logs
-            const colRef = collection(db, 'artifacts', 'private-live', 'users', MY_LOG_ID, 'logs');
-
-            onSnapshot(colRef, (snap) => {
-                notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                // Urutkan berdasarkan waktu buat (terbaru di atas)
-                notes.sort((a, b) => b.createdAt - a.createdAt);
-                
+        function loadData() {
+            const dbRef = ref(db, `private-live/users/${MY_LOG_ID}/logs`);
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    notes = Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    }));
+                    // Urutkan terbaru di atas (descending)
+                    notes.sort((a, b) => b.createdAt - a.createdAt);
+                } else {
+                    notes = [];
+                }
                 render();
                 updateUI();
-            }, (err) => {
-                console.error(err);
-                showNotif("Error memuat database");
+            }, (error) => {
+                showNotif("Akses Database Ditolak");
             });
         }
 
         window.addNote = async function() {
             const input = document.getElementById('noteInput');
-            const val = input.value.trim();
-            if (!val) return;
+            const content = input.value.trim();
+            if (!content) return;
 
             const btn = document.getElementById('saveBtn');
             btn.disabled = true;
 
             const now = new Date();
-            const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const timeLabel = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + 
+                              now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
             try {
-                const colRef = collection(db, 'artifacts', 'private-live', 'users', MY_LOG_ID, 'logs');
-                await addDoc(colRef, {
-                    content: val,
-                    displayDate: `${dateStr} • ${timeStr}`,
+                const dbRef = ref(db, `private-live/users/${MY_LOG_ID}/logs`);
+                const newNoteRef = push(dbRef);
+                await set(newNoteRef, {
+                    content: content,
+                    timeLabel: timeLabel,
                     createdAt: Date.now()
                 });
                 input.value = '';
-                showNotif("Catatan aman di cloud");
+                showNotif("Tersimpan secara realtime");
             } catch (e) {
-                showNotif("Gagal menyimpan ke cloud");
+                showNotif("Gagal menyimpan");
             } finally {
                 btn.disabled = false;
             }
         };
 
         window.deleteNote = async function(id) {
-            if (confirm("Hapus permanen entri ini?")) {
+            if (confirm("Hapus entri ini secara permanen?")) {
                 try {
-                    await deleteDoc(doc(db, 'artifacts', 'private-live', 'users', MY_LOG_ID, 'logs', id));
-                    showNotif("Terhapus");
+                    await remove(ref(db, `private-live/users/${MY_LOG_ID}/logs/${id}`));
+                    showNotif("Entri dihapus");
                 } catch (e) {
                     showNotif("Gagal menghapus");
                 }
@@ -209,14 +208,14 @@
         function render() {
             const list = document.getElementById('notesList');
             list.innerHTML = notes.map(n => `
-                <div class="timeline-item relative bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${n.displayDate}</span>
-                        <button onclick="deleteNote('${n.id}')" class="text-slate-300 hover:text-red-400 transition-colors">
+                <div class="timeline-item relative bg-white p-6 rounded-2xl shadow-sm border border-slate-50 transition-all hover:shadow-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">${n.timeLabel}</span>
+                        <button onclick="deleteNote('${n.id}')" class="text-slate-200 hover:text-red-400 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </button>
                     </div>
-                    <p class="text-slate-700 whitespace-pre-wrap leading-relaxed text-[15px] font-normal">${n.content}</p>
+                    <p class="text-slate-600 whitespace-pre-wrap leading-relaxed font-light text-[16px]">${n.content}</p>
                 </div>
             `).join('');
         }
@@ -231,21 +230,21 @@
                 container.classList.add('hidden');
                 state.classList.remove('hidden');
                 document.getElementById('loadingIcon').classList.add('hidden');
-                document.getElementById('stateMessage').innerText = "Cloud Log kosong. Mulai menulis...";
+                document.getElementById('stateMessage').innerText = "Belum ada riwayat log.";
             }
         }
 
         window.exportToTxt = function() {
             if (!notes.length) return;
-            let txt = "=== PRIVATE LOG CLOUD ARCHIVE ===\n\n";
+            let txt = "=== PRIVATE LOG REALTIME ARCHIVE ===\n\n";
             [...notes].reverse().forEach((n, i) => {
-                txt += `ENTRI #${i+1}\n${n.displayDate}\n--------------------------\n${n.content}\n\n\n`;
+                txt += `ENTRI #${i+1}\n${n.timeLabel}\n--------------------------\n${n.content}\n\n\n`;
             });
             const blob = new Blob([txt], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `private_log_archive.txt`;
+            a.download = `private_log_${new Date().getTime()}.txt`;
             a.click();
         }
 
@@ -256,7 +255,9 @@
             setTimeout(() => n.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none'), 2000);
         }
 
-        init();
+        start();
     </script>
 </body>
 </html>
+
+```
